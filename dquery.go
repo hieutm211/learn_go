@@ -3,6 +3,11 @@ package main
 
 import (
     "fmt"
+    "bufio"
+    "io"
+    "os"
+    "strconv"
+    "strings"
 )
 
 type pair struct {
@@ -96,35 +101,87 @@ func compress(a []int) {
     }
 }
 
-func main(){
-    var n, u, v, id int
-    var fw fenwick
-    var prev [1000001]int
+func readInput() {
+    reader := bufio.NewReaderSize(os.Stdin, 1024 * 1024)
 
-    fmt.Scanf("%d", &n)
+    var n int
+    var nTemp int64
+    var err error
+
+    nTemp, err = strconv.ParseInt(readLine(reader), 10, 64)
+    checkErr(err)
+
+    n = int(nTemp)
     a = make([]int, n)
-    fw.Init(n)
+    
+    arrTemp := strings.Split(readLine(reader), " ")
 
     for i := 0; i < len(a); i++ {
-	fmt.Scanf("%v", &a[i])
+	arrItemTemp, err := strconv.ParseInt(arrTemp[i], 10, 64)
+	checkErr(err)
+
+	a[i] = int(arrItemTemp)
     }
-    fmt.Scanf("\n")
-    fmt.Scanf("%d", &n)
+
+    nTemp, err = strconv.ParseInt(readLine(reader), 10, 64)
+    checkErr(err)
+
+    n = int(nTemp)
 
     query = make([]qtype, n)
     ans = make([]int, n)
-
+    
     for i := 0; i < len(query); i++ {
-	query[i].id = i
-	fmt.Scanf("%v%v%v", &query[i].first, &query[i].second)
-	query[i].first--
-	query[i].second--
-    }
+	pairTemp := strings.Split(readLine(reader), " ")
+	checkErr(err)
 
+	query[i].id = i
+	var temp int64
+	temp, err = strconv.ParseInt(pairTemp[0], 10, 64)
+	query[i].first = int(temp) -1
+	temp, err = strconv.ParseInt(pairTemp[1], 10, 64)
+	query[i].second = int(temp) -1
+    }
+}
+
+func readLine(reader *bufio.Reader) string {
+    str, _, err := reader.ReadLine()
+    if err == io.EOF {
+	return ""
+    }
+    return strings.TrimRight(string(str), "\r\n")
+}
+
+func checkErr(err error) {
+    if err != nil {
+	panic(err)
+    }
+}
+
+func writeOutput() {
+    out := bufio.NewWriter(os.Stdout)
+
+    for i := range ans {
+	fmt.Fprintf(out, "%d\n", ans[i])
+	if i%1000 == 0 {
+	    out.Flush()
+	}
+    }
+    out.Flush()
+}
+
+func main(){
+    var u, v, id int
+    var fw fenwick
+    var prev [1000001]int
+
+    readInput()
 
     compress(a)
 
     sort_qtype(query, 0, len(query)-1)
+
+    fw.Init(len(a))
 
     for i := range prev {
 	prev[i] = -1
@@ -147,7 +204,6 @@ func main(){
 	ans[id] = fw.Get(v) - fw.Get(u-1)
     }
 
-    for _, x := range ans {
-	fmt.Println(x)
-    }
+    writeOutput()
+
 }
